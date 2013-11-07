@@ -1,0 +1,101 @@
+$Id: 0Intro_Error_PHP4_ENGLISH.txt 166 2011-02-26 09:28:00Z horseluke@126.com $
+
+
+<?php
+/*
+Inter_Error_PHP4.php is an independent file.
+PHP VERSION MUST BE >=4.3.0 & <5.0.0.
+You should use Inter_Error class file (Error.php) while PHP >= 5.0.0
+*/
+//Usage (demo):
+require_once("Inter_Error_PHP4.php");     //require / require_once Inter_Error_PHP4.php at a proper place as you wish
+//Sets a user function (error_handler) to handle errors in a script
+set_error_handler('Inter_Error_PHP4_error_handler');
+//Setting by using function Inter_Error_PHP4_config.
+ /**
+  * keys and the default value in static array $conf within the function Inter_Error_PHP4_config:
+     * debugMode:
+     * Open debug mode? If true, it will show at the end of the webpage in web browser
+     * option: false(default)/true
+     * var type: bool
+     * 
+     * logType:
+     * Define how to log the errors. 
+     * 'detail': log with the trace info. Not recommend using this value in deploy environment unless you are facing a difficult problem
+     * 'simple': log without the trace info.
+     * false: do not log
+     * option: false(default)/'detail'/'simple'
+     * var type: bool|string
+     * 
+     * logDir:
+     * The directory to save the log file. Do not have '/' or '\' at the end of the script
+     * This setting is affected by 'logType'. If 'logType' is false, it will do nothing.
+     * But if 'logType' is not false, and this setting is blank or is not a directory. it will log error by using setting in php.ini.
+     * option: ''(blank, default)/any directory value
+     * var type: string
+     * 
+     * suffix:
+     * the suffix of the log file
+     * option: '-Inter-ErrorLog.log'(default)
+     * var type: string
+     * 
+     * variables:
+     * the key you want to export and show variables in $GLOBALS
+     * option: array("_GET", "_POST", "_SESSION", "_COOKIE")(default)
+     * var type: array
+     * 
+     * ignoreERROR:
+     * Some program can easily generate many E_NOTICEs. You can omit them by changing array setting 'ignoreERROR'
+     * for example, by setting: array(E_NOTICE, E_USER_NOTICE) , E_NOTICE and E_USER_NOTICE will be omitted.
+     * Predefined Constants in Error Handling: http://docs.php.net/manual/en/errorfunc.constants.php
+     * option: array()(default)
+     * var type: array
+  */
+Inter_Error_PHP4_config('debugMode', true);
+//Inter_Error_PHP4_config('logType', 'simple');
+//Inter_Error_PHP4_config('logDir', dirname(__FILE__).'/Log' );
+//Inter_Error_PHP4_config('ignoreERROR', array(E_NOTICE));
+
+//demo code that can generate the error
+$variable1 = '1111';
+
+function a(){
+    b();
+}
+
+function b(){
+    echo $k;
+    echo 1/0;
+}
+
+function c(){
+	trigger_error('FATAL ERROR!', 256);
+	echo '99999999999999999999999999999999999999999999999';
+}
+
+class kkk{
+	function kk(){
+		echo 1/0;
+		//sometimes you want to know how and where method kk is called. 
+		//Now you can use trigger_error to show the executing procedure at the end of the webpage.
+		trigger_error('method kk is running~', E_USER_WARNING);
+	}
+	
+}
+
+a();
+$d = new kkk();
+$d->kk();
+c();
+
+
+//If you want to export and show some variables in $GLOBALS, 
+//you can use: Inter_Error_PHP4_config('variables', array(xxxxxxxxxx, xxxxxx, ...));
+//then: Inter_Error_PHP4_show_variables();
+//Attention: Inter_Error_PHP4_show_variables will be called automatically if any php error occurs and 'debugMode' is true.
+/*
+//Demo:
+Inter_Error_PHP4_config('variables', array("_GET", "_POST", "_SESSION", "_COOKIE", "variable1", "variable2") );
+Inter_Error_PHP4_show_variables();
+echo '<hr />';
+*/

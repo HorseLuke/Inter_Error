@@ -1,0 +1,59 @@
+$Id: 0Intro_Error.txt 174 2011-03-15 04:51:10Z horseluke@126.com $
+
+
+<?php
+/*
+Inter_Error类（Error.php）文件可单独使用。PHP版本要求：>=5.0.0。
+低于此php版本的可使用Inter_Error_PHP4.php文件
+*/
+//使用方法（代码示例）：
+date_default_timezone_set('PRC');    //设置时区，PRC内容请替换为合适的时区，详细的请自查php手册。PHP版本 >= 5.1.0的时候一定要做这步骤，否则很可能会导致记录时间不准（除非在引用前已经设置时区）；版本 < 5.1.0则不需要。
+require_once("Error.php");     //在适当的地方以require / require_once正确引用该文件
+//然后接管PHP的错误处理机制
+set_exception_handler(array('Inter_Error', 'exception_handler'));
+set_error_handler(array('Inter_Error', 'error_handler'), E_ALL);
+if(version_compare(PHP_VERSION, '5.2', '>=')){
+    register_shutdown_function(array('Inter_Error', 'detect_fatal_error'));
+}
+//然后可选择地使用如下方式进行设置（假如保持默认值，可以不需配置。默认值请查看Error.php里面关于静态属性$debugMode的说明）：
+Inter_Error::$conf['debugMode'] = true;
+//Inter_Error::$conf['friendlyExceptionPage']='1234.htm';
+//Inter_Error::$conf['logType'] = 'simple';
+//Inter_Error::$conf['logDir'] = dirname(__FILE__).'/Log';
+//针对国内通用程序面向过程编写、比较容易出现E_NOTICE和E_STRICT错误的实际情形（比如Discuz!、PHPWind等），可以考虑屏蔽E_NOTICE和E_STRICT错误，避免过多的错误调试记录产生。
+//请将指定的常量以数组传入。可传入的常量，请自行查找：PHP手册 -> 影响PHP行为的扩展 -> Error Handling -> 预定义常量。http://docs.php.net/manual/zh/errorfunc.constants.php
+//默认已经屏蔽E_STRICT，但设置时，如果不使用array_merge，则必须自己再填一次E_STRICT（如下代码所示）
+//Inter_Error::$conf['ignoreERROR'] = array(E_NOTICE, E_STRICT);
+
+//可引起错误的代码，这时候就会调出Inter_Error来处理了
+$variable1 = '1111';
+
+function a(){
+    b();
+}
+
+function b(){
+    echo $k;
+    echo 1/0;
+}
+
+function c(){
+	//有时候你想知道函数c是什么时候和怎样被调用的。这时候只需要用trigger_error，就可以在页面的最后完整的查看整个调用过程了。
+	trigger_error('function c is running~', E_USER_WARNING);
+	throw new exception('Exception Occur!');
+}
+
+a();
+
+
+//假如代码没有错误，但是你又想看看一些变量值。那么就可以设置好Inter_Error::$conf['variables']，然后静态调用show_variables方法，以显示变量。
+//注意：一旦有php代码出错，此方法会自动调用
+/*
+//以数组加入要检测的变量名即可。
+Inter_Error::$conf['variables'] = array("_GET", "_POST", "_SESSION", "_COOKIE", "variable1", "variable2");
+echo '<hr />';
+Inter_Error::show_variables();
+echo '<hr />';
+*/
+
+c();
